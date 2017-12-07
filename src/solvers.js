@@ -14,10 +14,107 @@
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that 
 //none of them can attack each other
 
+window.generateNDigits = function(n) {
+  var arr = [];
+  if (n <= 1) {
+    return [1];
+  } else {
+    for (var i = 0; i < n; i++) {
+      for (var j = 0; j < n; j++) {
+        if (n === 2) {
+          if (!areAnyEqual(i, j)) {
+            arr.push([i ,j]);
+          }
+        } else {
+          for (var k = 0; k < n; k++) {
+            if (n === 3) {
+              if (!areAnyEqual(i, j, k)) {
+                arr.push([i, j, k]);
+              }
+            } else {
+              for (var l = 0; l < n; l++) {
+                if (n === 4) {
+                  if (!areAnyEqual(i, j, k ,l)) {
+                    arr.push([i, j, k, l]);
+                  } 
+                } else {
+                  for (var m = 0; m < n; m++) {
+                    if (n === 5) {
+                      if (!areAnyEqual(i, j, k, l, m)) {
+                        arr.push([i, j, k, l, m]);
+                      }
+                    } else {
+                      for (var o = 0; o < n; o++) {
+                        if (n === 6) {
+                          if (!areAnyEqual(i, j, k, l, m, o)) {
+                            arr.push([i, j, k, l, m, o]);
+                          } 
+                        } else {
+                          for (var p = 0; p < n; p++) {
+                            if (n === 7) {
+                              if (!areAnyEqual(i, j, k, l, m, o, p)) {
+                                arr.push([i, j, k, l, m, o, p]);
+                              }
+                            } else {
+                              for (var q = 0; q < n; q++) {
+                                if (n === 8) {
+                                  if (!areAnyEqual(i, j, k, l, m, o, p, q)) {
+                                    arr.push([i, j, k, l, m, o, p, q]);
+                                  }  
+                                } else {
+                                  console.error("cannot take n: " + n); 
+                                }
+                              } 
+                            }
+                          }
+                        }
+                      }
+                    } 
+                  }
+                }
+              }
+            }
+          } 
+        }
+      }
+    }
+  }
+  return arr;
+}
 
+window.rookGenerator = function(arr) {
+  var rookBoard = [];
+  for (var i = 0; i < arr.length; i++) {
+    var thisRow = [];
+    for (var j = 0; j < arr.length; j++) {
+      thisRow.push(0);
+    }
+    rookBoard.push(thisRow);
+  }
+  for (var i = 0; i < arr.length; i++) {
+      if (i >= arr.length-1) {
+        rookBoard[arr[i]][arr[0]] = 1;
+      } else {
+        rookBoard[arr[i]][arr[i + 1]] = 1;        
+      }
+    }
+    console.log('outside of the loops');
+    console.log(rookBoard);
+    return rookBoard;
+}
+
+window.areAnyEqual = function(){
+  for (var i = 0; i < arguments.length; i++) {
+    for (var j = 0; j < arguments.length; j++) {
+      if (arguments[i] === arguments[j] && i !== j) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 window.findNRooksSolution = function(n) {
-  //debugger;
   var solution = [];
   for (var i = 0; i < n; i++) {
     var thisRow = [];
@@ -49,6 +146,14 @@ window.countNRooksSolutions = function(n) {
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that 
 //none of them can attack each other
 window.findNQueensSolution = function(n) {
+  //call generateNDigits
+  //feed the result into rookGenerator
+  //feed the result of that into hasMajorDiagonalConflictAt, removing any that do
+  //feed the result of that into hasMinorDiagonalConflictAt, removing any that do
+  //the result of that is our answer!
+  //the length of that is the answer to countNQueensSolutions
+  
+  
   var solution = undefined; //fixme
   
   /*
