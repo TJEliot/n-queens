@@ -83,24 +83,31 @@ window.generateNDigits = function(n) {
 }
 
 window.rookGenerator = function(arr) {
-  var rookBoard = [];
-  for (var i = 0; i < arr.length; i++) {
-    var thisRow = [];
-    for (var j = 0; j < arr.length; j++) {
-      thisRow.push(0);
-    }
-    rookBoard.push(thisRow);
+  var returner = [];
+  if (arr.length === 0){
+    return [];
   }
-  for (var i = 0; i < arr.length; i++) {
-      if (i >= arr.length-1) {
-        rookBoard[arr[i]][arr[0]] = 1;
+  var howLong = arr[0].length;
+  for (var j = 0; j < arr.length; j++){
+    var ourRow = Array(howLong).fill(0);
+    var ourArray = [];
+    // so if we're looking for nxn matrices, this gives
+    // us a single n long array full of 0s
+    for (var i = 0; i < howLong; i++) {
+      ourArray.push(ourRow.slice());
+    }
+    //now ourArray is an nxn matrix with all 0s
+    for (var i = 0; i < howLong; i++) {
+      if (i === howLong-1){
+        ourArray[arr[j][i]][arr[j][0]] = 1;
       } else {
-        rookBoard[arr[i]][arr[i + 1]] = 1;        
+        ourArray[arr[j][i]][arr[j][i+1]] = 1;
       }
     }
-    console.log('outside of the loops');
-    console.log(rookBoard);
-    return rookBoard;
+    returner.push(ourArray);
+  }
+  console.log(returner);
+  return returner;
 }
 
 window.areAnyEqual = function(){
@@ -115,18 +122,19 @@ window.areAnyEqual = function(){
 }
 
 window.findNRooksSolution = function(n) {
-  var solution = [];
-  for (var i = 0; i < n; i++) {
-    var thisRow = [];
-    for (var j = 0; j < n; j++) {
-      if (j === i){
-        thisRow[j] = 1;
-      } else {
-        thisRow[j] = 0;
-      }
-    }
-    solution.push(thisRow);
-  }
+  
+  // var solution = [];
+  // for (var i = 0; i < n; i++) {
+  //   var thisRow = [];
+  //   for (var j = 0; j < n; j++) {
+  //     if (j === i){
+  //       thisRow[j] = 1;
+  //     } else {
+  //       thisRow[j] = 0;
+  //     }
+  //   }
+  //   solution.push(thisRow);
+  // }
   console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
       return solution;
 };
@@ -135,26 +143,50 @@ window.findNRooksSolution = function(n) {
 //none of them can attack each other
 
 window.countNRooksSolutions = function(n) {
-  var counter = 1;
-  for (var i = 1; i <= n; i++) {
-    counter *= i;
-  }
-  console.log('Number of solutions for ' + n + ' rooks:', counter);
-  return counter;
+  var solutionCount = 0;
+  var board = new Board({n:n});
+  
+  
+  findSolution(0, n, board, "hasAnyRooksConflicts", function(){
+    solutionCount++;
+  });
+  return solutionCount;
+  // var counter = 1;
+  // for (var i = 1; i <= n; i++) {
+  //   counter *= i;
+  // }
+  // console.log('Number of solutions for ' + n + ' rooks:', counter);
+  // return counter;
 };
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that 
 //none of them can attack each other
-window.findNQueensSolution = function(n) {
+window.findNQueensSolutionA = function(num) {
+  var solution = [];
+  // if (num === 0){
+  //   solution = [[]];
+  // }
+  // if (num === 2 || num === 3){
+  //   solution = new Board({n: num});  
+  // }
   //call generateNDigits
+  var ourDigits = this.generateNDigits(num);
+  console.log(ourDigits);
   //feed the result into rookGenerator
+  var ourRooks = this.rookGenerator(ourDigits);
   //feed the result of that into hasMajorDiagonalConflictAt, removing any that do
-  //feed the result of that into hasMinorDiagonalConflictAt, removing any that do
+  // gotta turn our matrices into boards first
+  
+  
+  var ourQueens = ourRooks.filter(function(element){
+    var board = new Board(element);
+    return !board.hasAnyMajorDiagonalConflicts() && !board.hasAnyMinorDiagonalConflicts() && !board.hasAnyColConflicts() && !board.hasAnyRowConflicts(); 
+  });
+  
   //the result of that is our answer!
   //the length of that is the answer to countNQueensSolutions
   
-  
-  var solution = undefined; //fixme
+  //var solution = ourQueens.length; //fixme
   
   /*
 
@@ -176,15 +208,45 @@ voila! now we have an array of all the legal queen placements
 
 */
 
-  console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
-  return solution;
+  console.log('Single solution for ' + num + ' queens:', JSON.stringify(ourQueens[0]));
+  return ourQueens;
 };
+
+window.findNQueensSolution = function(num){
+  return this.findNQueensSolutionA(num)[0];
+}
+
+window.findSolution = function(row, n, board, validator, callback) {
+  
+  if (row === n){
+    callback();
+    return;
+  } 
+
+  for (var i = 0; i < n; i++) {
+    board.togglePiece(row, i);
+    if (!board[validator]()) {
+      findSolution(row + 1, n, board, validator, callback);
+    }
+    board.togglePiece(row, i);
+  }
+}
 
 // return the number of nxn chessboards that exist, with n queens placed such that 
 //none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  var solutionCount = undefined; //fixme
-
-  console.log('Number of solutions for ' + n + ' queens:', solutionCount);
+  var solutionCount = 0;
+  var board = new Board({n:n});
+  
+  findSolution(n);
+  findSolution(0, n, board, "hasAnyQueensConflicts", function(){
+    solutionCount++;
+  });
   return solutionCount;
+  // var solutionCount = this.findNQueensSolutionA(n).length; 
+  
+
+  // console.log('Number of solutions for ' + n + ' queens:', solutionCount);
+ 
+  // return solutionCount;
 };
